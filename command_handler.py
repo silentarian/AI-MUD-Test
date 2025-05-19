@@ -5,6 +5,8 @@ from player import Player
 from llm_handler import add_event_history, get_ai_response, pprint
 from time import sleep
 
+command_count = {}
+MAX_REPEATED_BEFORE_HINT = 3
 
 PLAYER_TYPE = 'LLM' # human or LLM
 
@@ -31,25 +33,36 @@ def handle_move(player, arg, rooms):
     player.move(direction, rooms)
 
 def handle_look(player, arg, rooms):
-    if arg:
+    room = rooms[player.location]
+    if arg and arg not in ['around']:
+        # strip off "at" if user typed "look at <object>"
         if arg.split(' ')[0] == "at":
             arg = arg[3:]
-        if arg in rooms[player.location].objects:
-            pprint(f"You look at {arg}.")
-            pprint(rooms[player.location].objects[arg])
-        elif arg in rooms[player.location].exits:
-            pprint(f"You peer {arg} to see: " + rooms[player.location].exits[arg])
+
+        # try to find the object using alias matching
+        obj = room.find_object(arg)
+        if obj:
+            pprint(f"You look at {obj.name}.")
+            pprint(obj.description)
+            return
+
+        # check if player is looking in a direction
+        if arg in room.exits:
+            pprint(f"You peer {arg} to see: {room.exits[arg]}")
+            return
+        
+        # fallback message
         else:
-            pprint("You don't see that here.")
+            pprint(f"You don't see {arg} here.")
     else:
-        rooms[player.location].display()
+        room.display()
 
 def handle_quit(*_):
     print("Thanks for playing!")
     return True
 
 def handle_say(player, args, rooms):
-    pprint(f"Sylara says: {args}")
+    pprint(f"Sylara said: {args}")
 
 def command_handler(player: Player, rooms):
     rooms[player.location].display()
@@ -61,6 +74,11 @@ def command_handler(player: Player, rooms):
         "quit": handle_quit,
         "say": handle_say,
     }
+
+    repeat_count = 0
+    last_command = None
+
+    total_round_count = 0
 
     while True:
         if PLAYER_TYPE == 'human':
@@ -75,37 +93,51 @@ def command_handler(player: Player, rooms):
         if not user_input:
             continue
 
-        # Check for room-specific custom command first
-        if user_input in rooms[player.location].custom_commands:
-            rooms[player.location].custom_commands[user_input]()
-            #result = rooms[player.location].custom_commands[user_input]()
-            #print(result() if callable(result) else result)
-            continue
+        # Split commands up by semicolon
+        input_queue = user_input.split(';')
+        for user_input in input_queue:
 
-        # Parse input into command and argument
-        if " " in user_input:
-            verb, arg = user_input.split(" ", 1)
-        else:
-            verb, arg = user_input, ""
-
-        # Normalize command
-        command = COMMAND_ALIASES.get(verb, verb)
-
-        # If the player typed just a direction (e.g. "n"), use it as the arg too
-        if command == "move" and not arg:
-            arg = verb
-
-        # Dispatch if available
-        handler = command_map.get(command)
-        if handler:
-            should_quit = handler(player, arg, rooms)
-            if should_quit:
-                break      
-
-        else:
-            pprint("Command not recognized.")
+            user_input = user_input.strip()
+            # Check for room-specific custom command first
+            if user_input in rooms[player.location].custom_commands:
+                rooms[player.location].custom_commands[user_input]()
+                continue
+    
+            # Parse input into command and argument
+            if " " in user_input:
+                verb, arg = user_input.split(" ", 1)
+            else:
+                verb, arg = user_input, ""
+    
+            # Normalize command
+            command = COMMAND_ALIASES.get(verb, verb)
+    
+            # If the player typed just a direction (e.g. "n"), use it as the arg too
+            if command == "move" and not arg:
+                arg = verb
+    
+            # Dispatch if available
+            handler = command_map.get(command)
+            if handler:
+                should_quit = handler(player, arg, rooms)
+                if should_quit:
+                    break
+    
+            else:
+                pprint(f"Sylara tried: {command}. This command is invalid.")
+    
+            # Help prevent repeated commands
+            if command not in command_count:
+                command_count[command] = 0
+            command_count[command] += 1
+            if repeat_count > 3:
+                pprint("**You feel like you've already tried that. Maybe it's time to explore elsewhere?**")
+            else:
+                command_count[command] = 0
 
         if PLAYER_TYPE == 'LLM':
+            total_round_count += 1
+            print(total_round_count)
             sleep(4)
 
         print()
