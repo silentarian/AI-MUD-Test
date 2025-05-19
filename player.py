@@ -1,6 +1,7 @@
 # --- player.py ---
 
 from entity import Entity
+from llm_handler import pprint
 import random
 
 class Player(Entity):
@@ -19,10 +20,10 @@ class Player(Entity):
         next_room_id = current_room.get_exit(direction)
         if next_room_id and next_room_id in rooms:
             self.location = next_room_id
-            print(f"You move {direction}.")
+            pprint(f"You move {direction}.")
             rooms[self.location].display()
         else:
-            print("You can't go that way.")
+            pprint("You can't go that way.")
 
     def attack_target(self):
         if not self.targets:
@@ -32,11 +33,11 @@ class Player(Entity):
         valid_targets = [m for m in self.targets if m.is_alive() and m.location == self.location]
 
         if not valid_targets:
-            print(f"{self.name} has no valid targets in the room. Combat paused.")
+            pprint(f"{self.name} has no valid targets in the room. Combat paused.")
             self.in_combat = False
             return
 
         self.in_combat = True  # Reaffirm combat is ongoing
         target = random.choice(valid_targets)
-        print(f"{self.name} attacks {target.name}!")
+        pprint(f"{self.name} attacks {target.name}!")
         target.take_damage(self.attack_power)

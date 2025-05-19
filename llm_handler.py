@@ -15,15 +15,13 @@ You may only respond using MUD-style game commands such as:
 - attack [target]
 - use [object]
 
-You may combine multiple commands using semicolons. Do not narrate. Do not break character. Only use valid commands.
+Do not narrate. Do not break character. Only use valid commands. Use only one command at a time.
 """
 event_history = []
-MAX_EVENTS = 50
+MAX_EVENTS = 100
 
-def build_prompt(state):
-  character = state['character']
-  world = state['world']
-  room = world[character.location]
+def build_prompt(player, rooms):
+  room = rooms[player.location]
 
   user_prompt = f'''
   Room: {room.name}
@@ -52,7 +50,11 @@ def add_event_history(event):
   if len(event_history) > MAX_EVENTS:
     event_history = event_history[-MAX_EVENTS:]
 
-def get_ai_response(state):
-  user_prompt = build_prompt(state)
+def get_ai_response(player, rooms):
+  user_prompt = build_prompt(player, rooms)
   response = query_llm(user_prompt)
   return response
+
+def pprint(statement):
+  add_event_history(statement)
+  print(statement)

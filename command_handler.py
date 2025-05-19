@@ -1,5 +1,10 @@
 # --- command_handler.py ---
+from httpx import get
 from player import Player
+from llm_handler import add_event_history, get_ai_response, pprint
+
+
+PLAYER_TYPE = 'human' # human or LLM
 
 COMMAND_ALIASES = {
     "n": "move", "north": "move",
@@ -26,10 +31,10 @@ def handle_move(player, arg, rooms):
 def handle_look(player, arg, rooms):
     if arg:
         if arg in rooms[player.location].objects:
-            print(f"You look at {arg}.")
-            print(rooms[player.location].objects[arg])
+            pprint(f"You look at {arg}.")
+            pprint(rooms[player.location].objects[arg])
         else:
-            print("You don't see that here.")
+            pprint("You don't see that here.")
     else:
         rooms[player.location].display()
 
@@ -48,7 +53,14 @@ def command_handler(player: Player, rooms):
     }
 
     while True:
-        user_input = input("> ").strip().lower()
+        if PLAYER_TYPE == 'human':
+            user_input = input("> ").strip().lower()
+        elif PLAYER_TYPE == 'LLM':
+            user_input = get_ai_response(player, rooms)
+            pprint("Sylara input: " + user_input)
+        else:
+            print("Error! User type not defined in command_handler")
+            break
 
         if not user_input:
             continue
@@ -78,22 +90,9 @@ def command_handler(player: Player, rooms):
         if handler:
             should_quit = handler(player, arg, rooms)
             if should_quit:
-                break
-
-        # if command == "quit":
-        #     print("Thanks for playing!")
-        #     break
-
-        # elif command == "move":
-        #     direction = DIRECTION_ALIASES.get(arg, arg)
-        #     player.move(direction, rooms)
-
-        # elif command == "look":
-        #     rooms[player.location].display()
-
-        
+                break      
 
         else:
-            print("I don't understand that command.")
+            pprint("Command not recognized.")
 
 

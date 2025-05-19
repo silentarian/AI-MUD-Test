@@ -1,4 +1,5 @@
 from room import Room
+from llm_handler import pprint
 
 def build_world():
   rooms = {}
@@ -29,7 +30,7 @@ def build_world():
 
   # Room specific commands
   def rotate_painting():
-    print("You rotate the painting, and a click sound occurs, opening a secret door in the hallway!")
+    pprint("You rotate the painting, and a click sound occurs, opening a secret door in the hallway!")
     rooms['hallway'].connect("east","secret_room")
     return None
   rooms['hallway'].custom_commands["rotate painting 3"] = rotate_painting
