@@ -5,7 +5,7 @@ def build_world():
   rooms = {}
 
   # Define rooms
-  rooms['hallway'] = Room(1,"Hallway","A hallway extends in both directions. Eerie painting cover the walls, each seeming to shift when you're not looking.")
+  rooms['hallway'] = Room(1,"Hallway","A hallway extends in both directions. Eerie paintings cover the walls, each seeming to shift when you're not looking.")
   rooms['library'] = Room(2,"Library","The library is old and musty. Books cover the room wall to wall, some new and some older than time.  A large desk stands in the middle of the room.")
   rooms['secret_room'] = Room(3,"Secret Room","You've found it! The secret room! Congrats! Please say 'quit' to end the game now.")
   
@@ -25,7 +25,7 @@ def build_world():
     'books':"Old books line the walls. The languages seem to be of all kinds, yet none of them you know.",
     'desk':"A sturdy looking desk is covered in documents.",
     'documents':"A schematic stands out from the rest, dust-free and seeming to have been used recently.",
-    'schematic':"The schematic is a blueprint of the hallway just outside of the library. An arrow is drawn to one of the paintings, with simple words 'ROTATE', and 'GOLDEN CROSS'."
+    'schematic':"The schematic is a blueprint of the hallway just outside of the library. Some notes are written over the hallway: 'ROTATE', and 'GOLDEN CROSS'."
   }
 
   # Room specific commands

@@ -1,10 +1,12 @@
 # --- command_handler.py ---
+from os import wait
 from httpx import get
 from player import Player
 from llm_handler import add_event_history, get_ai_response, pprint
+from time import sleep
 
 
-PLAYER_TYPE = 'human' # human or LLM
+PLAYER_TYPE = 'LLM' # human or LLM
 
 COMMAND_ALIASES = {
     "n": "move", "north": "move",
@@ -30,9 +32,13 @@ def handle_move(player, arg, rooms):
 
 def handle_look(player, arg, rooms):
     if arg:
+        if arg.split(' ')[0] == "at":
+            arg = arg[3:]
         if arg in rooms[player.location].objects:
             pprint(f"You look at {arg}.")
             pprint(rooms[player.location].objects[arg])
+        elif arg in rooms[player.location].exits:
+            pprint(f"You peer {arg} to see: " + rooms[player.location].exits[arg])
         else:
             pprint("You don't see that here.")
     else:
@@ -42,6 +48,9 @@ def handle_quit(*_):
     print("Thanks for playing!")
     return True
 
+def handle_say(player, args, rooms):
+    pprint(f"Sylara says: {args}")
+
 def command_handler(player: Player, rooms):
     rooms[player.location].display()
 
@@ -49,7 +58,8 @@ def command_handler(player: Player, rooms):
     command_map = {
         "move": handle_move,
         "look": handle_look,
-        "quit": handle_quit
+        "quit": handle_quit,
+        "say": handle_say,
     }
 
     while True:
@@ -57,7 +67,7 @@ def command_handler(player: Player, rooms):
             user_input = input("> ").strip().lower()
         elif PLAYER_TYPE == 'LLM':
             user_input = get_ai_response(player, rooms)
-            pprint("Sylara input: " + user_input)
+            print("Sylara input: " + user_input)
         else:
             print("Error! User type not defined in command_handler")
             break
@@ -94,5 +104,10 @@ def command_handler(player: Player, rooms):
 
         else:
             pprint("Command not recognized.")
+
+        if PLAYER_TYPE == 'LLM':
+            sleep(4)
+
+        print()
 
 
