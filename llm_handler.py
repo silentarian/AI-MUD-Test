@@ -23,14 +23,14 @@ MAX_EVENTS = 100
 def build_prompt(player, rooms):
   room = rooms[player.location]
 
-  user_prompt = f'''
-  Room: {room.name}
-  Room description: {room.description}
-  Exits: {', '.join(room.exits)}
+  user_prompt = f"""
+Room: {room.name}
+Room description: {room.description}
+Exits: {', '.join(room.exits)}
 
-  Event history:
-  {'\n'.join(event_history)}
-  '''
+Event history:
+{'\n'.join(event_history)}
+"""
   return user_prompt
 
 def query_llm(prompt: str) -> str:
