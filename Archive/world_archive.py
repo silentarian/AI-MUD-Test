@@ -1,6 +1,7 @@
 from room import Room
 from llm_handler import pprint
 from object import Object
+from typing import cast
 
 def build_world():
   rooms = {}
@@ -35,8 +36,10 @@ def build_world():
     pprint("You rotate the painting, and a click sound occurs, opening a secret door to the east!")
     rooms['hallway'].connect("east","secret_room")
 
-  painting3 = next((sub for sub in rooms['hallway'].objects if sub.name == "painting 3"), None)
-  painting3.add_action("rotate", rotate_painting)
-  painting3.add_action("turn", rotate_painting)
+  painting3 = cast(Object, next((sub for sub in rooms['hallway'].objects if sub.name == "painting 3"), None))
+  if painting3 is not None:
+    painting3.add_action(["rotate","turn"], rotate_painting)
+  else:
+    raise ValueError("Painting 3 not found in hallway objects.")
 
   return rooms, 'hallway' # rooms dictionary and starting room ID

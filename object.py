@@ -15,8 +15,11 @@ class Object:
   def __repr__(self):
     return f"<GameObject: {self.name}>"
 
-  def add_action(self, verb, function):
-    self.verbs[verb] = function
+  def add_action(self, verbs, function):
+    if isinstance(verbs, str):
+      verbs = [verbs]
+    for verb in verbs:
+      self.verbs[verb] = function
 
   def interact(self, verb, target=None):
     if verb in self.verbs:
