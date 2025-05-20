@@ -65,7 +65,7 @@ def query_llm(prompt: str) -> str:
   # print()
   # print("USER PROMPT: " + prompt)
   # New interface returns .choices list
-  print("Running LLM...")
+  #print("Running LLM...")
   return response.choices[0].message.content.strip()
 
 def add_event_history(event):

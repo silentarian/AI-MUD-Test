@@ -6,7 +6,7 @@ class Object:
       self.visible = visible
       self.pickupable = pickupable
       self.aliases = aliases if aliases else []
-      self.functions = functions if functions else {}
+      self.verbs = {} # verb -> function (e.g. "rotate": self.rotate_painting)
 
   def matches(self, input_name):
     input_name = input_name.lower()
@@ -14,3 +14,12 @@ class Object:
 
   def __repr__(self):
     return f"<GameObject: {self.name}>"
+
+  def add_action(self, verb, function):
+    self.verbs[verb] = function
+
+  def interact(self, verb, target=None):
+    if verb in self.verbs:
+      return self.verbs[verb](target)
+    return f"You can't {verb} {self.name}."
+

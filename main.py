@@ -10,8 +10,5 @@ def main():
 
   command_handler(player, rooms)
 
-
-
-
 if __name__ == "__main__":
   main()
