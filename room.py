@@ -1,4 +1,4 @@
-from llm_handler import pprint
+from print_commands import pprint
 
 class Room:
   def __init__(self, name, description):
@@ -15,12 +15,12 @@ class Room:
       return self.exits.get(direction, None)
 
   def display(self):
-      print(f"\n{self.name}")
-      print(self.description)
-      print("Exits: " + ", ".join(self.exits.keys()))
+      pprint(f"\n{self.name}")
+      pprint(self.description)
+      pprint("Exits: " + ", ".join(self.exits.keys()))
       visible_objects = [obj.name for obj in self.objects if obj.visible]
       if visible_objects:
-          print("You see: " + ", ".join(visible_objects))
+          pprint("You see: " + ", ".join(visible_objects))
 
   def find_object(self, name):
       for obj in self.objects:

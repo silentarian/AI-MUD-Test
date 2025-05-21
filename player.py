@@ -1,11 +1,12 @@
 # --- player.py ---
 
 from entity import Entity
-from llm_handler import pprint
+from party import Party
+from print_commands import pprint
 import random
 
 class Player(Entity):
-    def __init__(self, name):
+    def __init__(self, name, type, party:Party=Party()):
         super().__init__(name, hp=100, attack_power=10)
         self.stats = {
             "str": 10, "dex": 10, "con": 10,
@@ -14,13 +15,16 @@ class Player(Entity):
         self.inventory = []
         self.location = None
         self.targets = []  # List of Monster objects
+        self.party = party
+        self.type = type
 
     def move(self, direction, rooms):
         current_room = rooms[self.location]
         next_room_id = current_room.get_exit(direction)
         if next_room_id and next_room_id in rooms:
-            self.location = next_room_id
-            pprint(f"You move {direction}.")
+            for member in self.party.members:
+                member.location = next_room_id
+            pprint(f"Your party moves {direction}.")
             rooms[self.location].display()
         else:
             pprint("You can't go that way.")

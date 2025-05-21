@@ -1,4 +1,4 @@
-from llm_handler import pprint
+from print_commands import pprint
 
 def setup_puzzles(rooms):
     # Hallway puzzle to open secret door
