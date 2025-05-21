@@ -1,6 +1,6 @@
 # --- command_handler.py ---
 from player import Player
-from print_commands import pprint
+from print_commands import lprint, oprint, gprint # local print, other players print, global print
 
 command_count = {}
 MAX_REPEATED_BEFORE_HINT = 3
@@ -39,17 +39,17 @@ def handle_look(player, arg, rooms):
         # try to find the object using alias matching
         obj = room.find_object(arg)
         if obj:
-            pprint(f"{player.name} looks at {obj.name}.")
-            return f"You see: {obj.description}"
+            lprint(player, f"You look at {obj.name}: {obj.description}")
+            oprint(player, f"{player.name} looks at {obj.name}.")
 
         # check if player is looking in a direction
-        if arg in room.exits:
-            pprint(f"{player.name} peers {arg}.")
-            return f"You see: {room.exits[arg]}"
+        elif arg in room.exits:
+            lprint(player, f"You look {arg} and see: {rooms.exits[arg].name}")
+            oprint(player, f"{player.name} peers {arg}.")
         
         # fallback message
         else:
-            pprint(f"{player.name} doesn't see {arg} here.")
+            lprint(player, f"You don't see {arg} here.")
     else:
         room.display()
 
@@ -58,19 +58,20 @@ def handle_quit(*_):
     quit()
 
 def handle_say(player, args, rooms):
-    pprint(f"{player.name} said: {args}")
+    lprint(player, f"You said: {args}")
+    oprint(player, f"{player.name} said: {args}")
 
 def handle_interact_command(player, verb, arg, rooms):
     current_room = rooms[player.location]
 
     obj = current_room.find_object(arg)
     if not obj:
-        pprint("You don't see {obj} here.")
+        lprint(player, f"You don't see {obj} here.")
         return
 
-    result = obj.interact(verb)
+    result = obj.interact(player, verb)
     if result:
-        pprint(result)
+        print(result)
 
 
 def command_handler(player: Player, rooms):
@@ -128,7 +129,7 @@ def process_command(player, user_input, rooms):
             output = handler(player, arg, rooms)
     
         else:
-            pprint(f"{player.name} tried: {command}. This command is invalid.")
+            gprint(player, f"{player.name} tried: {command}. This command is invalid.")
 
         print()
         return output

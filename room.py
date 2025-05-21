@@ -1,4 +1,4 @@
-from print_commands import pprint
+from print_commands import gprint
 
 class Room:
   def __init__(self, name, description):
@@ -14,13 +14,13 @@ class Room:
   def get_exit(self, direction):
       return self.exits.get(direction, None)
 
-  def display(self):
-      pprint(f"\n{self.name}")
-      pprint(self.description)
-      pprint("Exits: " + ", ".join(self.exits.keys()))
+  def display(self, player):
+      gprint(player, f"\n{self.name}")
+      gprint(player, self.description)
+      gprint(player, "Exits: " + ", ".join(self.exits.keys()))
       visible_objects = [obj.name for obj in self.objects if obj.visible]
       if visible_objects:
-          pprint("You see: " + ", ".join(visible_objects))
+          gprint(player, "You see: " + ", ".join(visible_objects))
 
   def find_object(self, name):
       for obj in self.objects:

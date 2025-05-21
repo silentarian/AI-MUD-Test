@@ -21,8 +21,8 @@ class Object:
     for verb in verbs:
       self.verbs[verb] = function
 
-  def interact(self, verb, target=None):
+  def interact(self, player, verb, target=None):
     if verb in self.verbs:
-      return self.verbs[verb](target)
+      return self.verbs[verb](player, target)
     return f"You can't {verb} {self.name}."
 

@@ -6,5 +6,6 @@ authors = ["Your Name <you@example.com>"]
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.28.1",
+    "llm>=0.25",
     "openai>=1.79.0",
 ]

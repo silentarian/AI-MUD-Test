@@ -1,15 +1,19 @@
 # Handles different ways of printing statements (i.e. player, LLM, or both)
 
-# Print only to Bot
-from llm_handler import add_event_history
+# Print locally
+def lprint(player, statement):
+  if player.type == "Human":
+    print(statement)
+  elif player.type == "LLM":
+    player.add_event_history(statement)
 
-def bprint(statement):
-  add_event_history(statement)
+# Print to others
+def oprint(player, statement):
+  for p in player.party.members:
+    if p != player:
+      lprint(p, statement)
 
-# Print to Both
-def pprint(statement):
-  add_event_history(statement)
-  print(statement)
-
-# Print only to Player
-# already handled through print command
+# Print globally
+def gprint(player, statement):
+  for p in player.party.members:
+    lprint(p, statement)

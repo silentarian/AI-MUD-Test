@@ -1,11 +1,14 @@
+from player import Player
 import openai
 import os
 
 openai.api_key = os.environ['MY_KEY']
 
+MAX_EVENTS = 50
+
 SYSTEM_PROMPT = """
-You are Sylara, a calm, curious player in a text-based MUD. Your goal is to reach the exit by solving puzzles and following clues.
-You are playing along side a human player called Tyrus. Work together!
+You are playing as one member of your party. Work together but act and speak according to your personality!
+Be sure to talk to your fellow team members. Engage in meaningful dialogue. Occasionally use each others' names when talking.
 You can see what other players are doing, but not what they see or think. Be sure to communicate what's important.
 
 Use only valid in-game commands:
@@ -22,7 +25,7 @@ Use only valid in-game commands:
 - Do not narrate or invent room or object descriptions. Describe only what is seen through commands.
 - Never repeat the same command more than twice. If nothing changes, try something else.
 - Never use vague directions (e.g., "go secret door") — only cardinal directions like `go east`.
-- Speak your thoughts out loud to Tyrus using `say`.
+- Communicate your thoughts when appropriate by using `say`.
 
 **Examples:**
 ✅ say This looks strange.; look statue 2 
@@ -38,46 +41,46 @@ Use only valid in-game commands:
 Trust what you've seen, follow the clues, and keep moving forward.
 """
 
-event_history = []
-MAX_EVENTS = 100
+class LLM(Player):
+  def __init__(self, name, personality):
+    super().__init__(name=name,type="LLM")
+    self.personality = personality
+    self.history = []
+    self.instructions = f"Your name is {self.name}. Your personality is: {self.personality}."
+    self.instructions += SYSTEM_PROMPT
 
-def build_prompt(player, rooms):
-  room = rooms[player.location]
+  def add_event_history(self, event):
+    self.history.append(event)
+    if len(self.history) > MAX_EVENTS:
+      self.history = self.history[-MAX_EVENTS:]
 
-  user_prompt = f"""
-  Room: {room.name}
-  Room description: {room.description}
-  Exits: {', '.join(room.exits)}
+  def build_prompt(self, rooms):
+    room = rooms[self.location]
 
-  Event history:
-  """
-  user_prompt += '\n'.join(event_history)
-  
-  return user_prompt
+    user_prompt = f"""
+    **Current Room**
+    Room: {room.name}
+    Room description: {room.description}
+    Exits: {','.join(room.exits)}
 
-def query_llm(prompt: str) -> str:
-  response = openai.chat.completions.create(
-      model="gpt-4o", # gpt-4o ; gpt-4o-mini ; gpt-4.1-nano ; gpt-4.1-mini
-      messages=[
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": prompt}],
-      temperature=0.7
-  )
-  # print("SYSTEM PROMPT: " + SYSTEM_PROMPT)
-  # print()
-  # print("USER PROMPT: " + prompt)
-  # New interface returns .choices list
-  #print("Running LLM...")
-  return response.choices[0].message.content.strip()
+    **Event History**
+    """
+    user_prompt += '\n'.join(self.history)
 
-def add_event_history(event):
-  global event_history
-  event_history.append(event)
-  if len(event_history) > MAX_EVENTS:
-    event_history = event_history[-MAX_EVENTS:]
+    return user_prompt
 
-def get_ai_response(player, rooms):
-  user_prompt = build_prompt(player, rooms)
-  response = query_llm(user_prompt)
-  return response
+  def query_llm(self,prompt:str) -> str:
+    response = openai.chat.completions.create(
+        model="gpt-4o", # gpt-4o ; gpt-4o-mini ; gpt-4.1-nano ; gpt-4.1-mini
+        messages=[
+          {"role": "system", "content": self.instructions},
+          {"role": "user", "content": prompt}],
+        temperature=0.7
+    )
+    return response.choices[0].message.content.strip()
 
+  def get_response(self, rooms):
+    prompt = self.build_prompt(rooms)
+    response = self.query_llm(prompt)
+    return response
+      

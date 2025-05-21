@@ -2,11 +2,11 @@
 
 from entity import Entity
 from party import Party
-from print_commands import pprint
+from print_commands import lprint, oprint, gprint
 import random
 
 class Player(Entity):
-    def __init__(self, name, type, party:Party=Party()):
+    def __init__(self, name, type="Human", party:Party=Party()):
         super().__init__(name, hp=100, attack_power=10)
         self.stats = {
             "str": 10, "dex": 10, "con": 10,
@@ -24,10 +24,10 @@ class Player(Entity):
         if next_room_id and next_room_id in rooms:
             for member in self.party.members:
                 member.location = next_room_id
-            pprint(f"Your party moves {direction}.")
-            rooms[self.location].display()
+            gprint(self, f"Your party moves {direction}.")
+            rooms[self.location].display(self)
         else:
-            pprint("You can't go that way.")
+            lprint(self,"You can't go that way.")
 
     def attack_target(self):
         if not self.targets:
@@ -37,11 +37,11 @@ class Player(Entity):
         valid_targets = [m for m in self.targets if m.is_alive() and m.location == self.location]
 
         if not valid_targets:
-            pprint(f"{self.name} has no valid targets in the room. Combat paused.")
+            lprint(self,f"{self.name} has no valid targets in the room. Combat paused.")
             self.in_combat = False
             return
 
         self.in_combat = True  # Reaffirm combat is ongoing
         target = random.choice(valid_targets)
-        pprint(f"{self.name} attacks {target.name}!")
+        gprint(self,f"{self.name} attacks {target.name}!")
         target.take_damage(self.attack_power)
