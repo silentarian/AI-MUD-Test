@@ -1,8 +1,7 @@
 from llm_handler import pprint
 
 class Room:
-  def __init__(self, room_id, name, description):
-      self.id = room_id
+  def __init__(self, name, description):
       self.name = name
       self.description = description
       self.exits = {}
